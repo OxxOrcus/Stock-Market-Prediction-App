@@ -65,12 +65,19 @@ A plot window will appear showing the comparison.
 - `requirements.txt` — List of required Python packages
 - `README.md` — Project documentation
 
-## Extending the App
+## Future Improvements
 
-- Replace Linear Regression with more advanced models (e.g., LSTM using TensorFlow or PyTorch)
-- Add real-time data visualization (e.g., with Plotly Dash or Streamlit)
-- Implement portfolio simulation and backtesting
-- Integrate more features for technical analysis
+This project can be extended in many ways. Here are some ideas for future enhancements:
+
+- **Advanced Modeling**: Replace the simple Linear Regression model with more sophisticated models like LSTMs (Long Short-Term Memory) using TensorFlow or PyTorch for better temporal analysis.
+- **Real-Time Visualization**: Implement a real-time dashboard using Plotly Dash or Streamlit to visualize stock prices and predictions as they update.
+- **Portfolio Simulation**: Build a feature to simulate a trading portfolio, allowing users to backtest strategies and track hypothetical performance.
+- **Technical Analysis Integration**: Incorporate more technical indicators (e.g., RSI, MACD, Bollinger Bands) to enrich the feature set for the model.
+- **Sentiment Analysis**: Integrate sentiment analysis from news articles or social media (e.g., Twitter, Reddit) to gauge market sentiment and improve prediction accuracy.
+- **Hyperparameter Tuning**: Add automated hyperparameter tuning using techniques like GridSearchCV or RandomizedSearchCV to optimize model performance.
+- **Interactive Web UI**: Develop a full-fledged interactive web application using a framework like Flask or Django, allowing for a richer user experience.
+- **Risk Management Features**: Introduce risk management metrics such as Sharpe Ratio, Value at Risk (VaR), and portfolio drawdown analysis.
+- **Containerization**: Provide a `Dockerfile` to containerize the application, ensuring a consistent and easily reproducible environment for deployment.
 
 ## License
 
