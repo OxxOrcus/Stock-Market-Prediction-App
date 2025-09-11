@@ -64,6 +64,22 @@ A plot window will appear showing the comparison.
 - `stock_predictor.py` — Main script for data fetching, modeling, and visualization
 - `requirements.txt` — List of required Python packages
 - `README.md` — Project documentation
+- `tests/` — Directory containing the test suite.
+
+## Testing
+
+This project uses `pytest` for testing. A comprehensive test suite has been added to ensure the reliability and correctness of the application's core logic.
+
+### Test Coverage
+
+The test suite provides **82% coverage** for the `stock_predictor.py` module, validating the following functionalities:
+- **Data Fetching**: Mocks API calls to `yfinance` to ensure the data fetching function behaves as expected.
+- **Data Preparation**: Verifies that the data is correctly transformed into features (X) and a target (y).
+- **Data Splitting**: Ensures that the data is split into training and testing sets correctly, without shuffling (critical for time-series data).
+- **Model Training**: Confirms that the `LinearRegression` model is trained and fitted properly.
+- **Plotting**: Mocks the `matplotlib` library to assert that plotting functions are called correctly without generating a GUI window.
+
+For detailed instructions on how to run the tests, please see the `tests/README.md` file.
 
 ## Future Improvements
 
