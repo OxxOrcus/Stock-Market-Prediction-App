@@ -92,3 +92,33 @@ def test_plot_predictions(mocker):
     mock_plt.xlabel.assert_called_once_with('Time')
     mock_plt.ylabel.assert_called_once_with('Price')
     mock_plt.show.assert_called_once()
+
+def test_run_backtest(mocker):
+    # Mock dependencies
+    mock_fetch_data = mocker.patch('stock_predictor.fetch_data')
+    mock_portfolio = mocker.patch('stock_predictor.Portfolio')
+    mock_strategy = mocker.patch('stock_predictor.MovingAverageCrossoverStrategy')
+    mock_backtester = mocker.patch('stock_predictor.Backtester')
+    mock_plt = mocker.patch('stock_predictor.plt')
+    mocker.patch('builtins.print')
+
+    # Mock return values
+    sample_data = pd.DataFrame({'Close': np.random.rand(100)})
+    mock_fetch_data.return_value = sample_data
+    mock_backtester.return_value.run.return_value = pd.DataFrame({'portfolio_value': np.random.rand(100)})
+    mock_backtester.return_value.get_summary.return_value = {'total_return': 0.1, 'final_portfolio_value': 110000}
+
+    # Call the function
+    from stock_predictor import run_backtest
+    run_backtest('AAPL')
+
+    # Assertions
+    mock_fetch_data.assert_called_once_with('AAPL')
+    mock_portfolio.assert_called_once()
+    mock_strategy.assert_called_once()
+    mock_backtester.assert_called_once()
+    mock_backtester.return_value.run.assert_called_once()
+    mock_plt.figure.assert_called_once()
+    mock_plt.plot.assert_called_once()
+    mock_plt.title.assert_called_once()
+    mock_plt.show.assert_called_once()
