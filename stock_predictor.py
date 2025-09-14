@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from portfolio import simulate_trading
 
 # 1. Download historical stock data
 def fetch_data(ticker, period='5y'):
@@ -93,6 +94,20 @@ def plot_predictions(data, y_test, y_pred):
     plt.ylabel('Price')
     plt.show()
 
+def plot_portfolio_performance(portfolio_values):
+    """
+    Plots the portfolio's performance over time.
+
+    Args:
+        portfolio_values (pandas.DataFrame): A DataFrame containing the portfolio's value over time.
+    """
+    plt.figure(figsize=(12,6))
+    plt.plot(portfolio_values.index, portfolio_values['value'])
+    plt.title('Portfolio Performance')
+    plt.xlabel('Date')
+    plt.ylabel('Portfolio Value')
+    plt.show()
+
 if __name__ == "__main__":
     ticker = input("Enter stock ticker (e.g., AAPL): ")
     data = fetch_data(ticker)
@@ -101,3 +116,7 @@ if __name__ == "__main__":
     model = train_model(X_train, y_train)
     y_pred = model.predict(X_test)
     plot_predictions(data, y_test, y_pred)
+
+    # Simulate trading and plot portfolio performance
+    portfolio_values = simulate_trading(model, data)
+    plot_portfolio_performance(portfolio_values)
