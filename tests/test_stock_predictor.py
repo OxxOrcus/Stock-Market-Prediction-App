@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from stock_predictor import fetch_data, prepare_data, split_data, train_model, plot_predictions
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from stock_predictor import fetch_data, prepare_data, split_data, build_and_train_model, plot_predictions
 
 def test_fetch_data(mocker):
     # Mock the yfinance.download function
@@ -30,65 +31,58 @@ def test_fetch_data(mocker):
 def test_prepare_data():
     # Create a sample DataFrame
     sample_data = pd.DataFrame({
-        'Close': [100, 102, 105, 103]
+        'Close': np.arange(100, 200)
     })
 
     # Call the function to be tested
-    X, y = prepare_data(sample_data)
+    X, y, scaler = prepare_data(sample_data, time_step=60)
 
-    # Define the expected output
-    expected_X = np.array([[100], [102], [105]])
-    expected_y = np.array([102, 105, 103])
-
-    # Assert that the output is correct
-    np.testing.assert_array_equal(X, expected_X)
-    np.testing.assert_array_equal(y, expected_y)
+    # Assert the shapes of the output
+    assert X.shape == (40, 60, 1)
+    assert y.shape == (40,)
+    assert isinstance(scaler, MinMaxScaler)
 
 def test_split_data():
     # Create sample data
-    X = np.array([[1], [2], [3], [4], [5]])
-    y = np.array([1, 2, 3, 4, 5])
+    X = np.random.rand(100, 60, 1)
+    y = np.random.rand(100)
 
     # Call the function
     X_train, X_test, y_train, y_test = split_data(X, y)
 
     # Assert the shapes of the output
-    assert X_train.shape == (4, 1)
-    assert X_test.shape == (1, 1)
-    assert y_train.shape == (4,)
-    assert y_test.shape == (1,)
+    assert X_train.shape == (80, 60, 1)
+    assert X_test.shape == (20, 60, 1)
+    assert y_train.shape == (80,)
+    assert y_test.shape == (20,)
 
-    # Assert the content of the output (no shuffling)
-    np.testing.assert_array_equal(X_train, np.array([[1], [2], [3], [4]]))
-    np.testing.assert_array_equal(X_test, np.array([[5]]))
-    np.testing.assert_array_equal(y_train, np.array([1, 2, 3, 4]))
-    np.testing.assert_array_equal(y_test, np.array([5]))
-
-def test_train_model():
+def test_build_and_train_model():
     # Create sample data
-    X_train = np.array([[1], [2], [3], [4]])
-    y_train = np.array([1, 2, 3, 4])
+    X_train = np.random.rand(80, 60, 1)
+    y_train = np.random.rand(80)
 
     # Call the function
-    model = train_model(X_train, y_train)
+    model = build_and_train_model(X_train, y_train)
 
-    # Assert that the model is a LinearRegression instance
-    assert isinstance(model, LinearRegression)
+    # Assert that the model is a Sequential instance
+    assert isinstance(model, Sequential)
 
-    # Assert that the model is fitted
-    assert hasattr(model, 'coef_')
+    # Assert that the model is compiled
+    assert model.optimizer is not None
+    assert model.loss is not None
 
 def test_plot_predictions(mocker):
     # Mock matplotlib.pyplot
     mock_plt = mocker.patch('stock_predictor.plt')
 
     # Create sample data
-    sample_data = pd.DataFrame({'Close': [1, 2, 3, 4, 5]})
-    y_test = np.array([4, 5])
-    y_pred = np.array([4.1, 5.1])
+    y_test = np.random.rand(20)
+    y_pred = np.random.rand(20)
+    scaler = MinMaxScaler()
+    scaler.fit(np.arange(100,200).reshape(-1, 1))
 
     # Call the function
-    plot_predictions(sample_data, y_test, y_pred)
+    plot_predictions(y_test, y_pred, scaler)
 
     # Assert that the plot functions were called
     mock_plt.figure.assert_called_once_with(figsize=(12,6))
