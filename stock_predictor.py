@@ -3,90 +3,62 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 
 # 1. Download historical stock data
 def fetch_data(ticker, period='5y'):
-    """Fetches historical stock data from Yahoo Finance.
-
-    Args:
-        ticker (str): The stock ticker symbol (e.g., 'AAPL').
-        period (str): The period for which to download the data.
-                      Valid periods are '1d', '5d', '1mo', '3mo',
-                      '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max'.
-                      Defaults to '5y'.
-
-    Returns:
-        pandas.DataFrame: A DataFrame containing the historical stock data.
-    """
+    """Fetches historical stock data from Yahoo Finance."""
     data = yf.download(ticker, period=period)
     return data
 
 # 2. Prepare features and target
-def prepare_data(data):
-    """Prepares the data for training the model.
+def prepare_data(data, time_step=60):
+    """Prepares the data for training the LSTM model."""
+    data_close = data[['Close']].values
+    scaler = MinMaxScaler(feature_range=(0,1))
+    scaled_data = scaler.fit_transform(data_close)
 
-    This function takes a DataFrame of stock data, creates a 'Target' column
-    by shifting the 'Close' price by one day, and then separates the features
-    (X) and the target (y).
+    X, y = [], []
+    for i in range(time_step, len(scaled_data)):
+        X.append(scaled_data[i-time_step:i, 0])
+        y.append(scaled_data[i, 0])
 
-    Args:
-        data (pandas.DataFrame): A DataFrame containing historical stock data
-                                 with at least a 'Close' column.
-
-    Returns:
-        tuple: A tuple containing:
-            - numpy.ndarray: The feature set (X).
-            - numpy.ndarray: The target values (y).
-    """
-    data = data[['Close']].copy()
-    data['Target'] = data['Close'].shift(-1)
-    data = data.dropna()
-    X = data[['Close']].values
-    y = data['Target'].values
-    return X, y
+    X, y = np.array(X), np.array(y)
+    X = np.reshape(X, (X.shape[0], X.shape[1], 1))
+    return X, y, scaler
 
 # 3. Train/test split
 def split_data(X, y):
-    """Splits the data into training and testing sets.
-
-    Args:
-        X (numpy.ndarray): The feature set.
-        y (numpy.ndarray): The target values.
-
-    Returns:
-        tuple: A tuple containing the split data:
-               (X_train, X_test, y_train, y_test).
-    """
+    """Splits the data into training and testing sets."""
     return train_test_split(X, y, test_size=0.2, shuffle=False)
 
-# 4. Train model
-def train_model(X_train, y_train):
-    """Trains a linear regression model.
+# 4. Build and Train model
+def build_and_train_model(X_train, y_train):
+    """Builds and trains the LSTM model."""
+    model = Sequential()
+    model.add(LSTM(50, return_sequences=True, input_shape=(X_train.shape[1], 1)))
+    model.add(LSTM(50, return_sequences=False))
+    model.add(Dense(25))
+    model.add(Dense(1))
 
-    Args:
-        X_train (numpy.ndarray): The training feature set.
-        y_train (numpy.ndarray): The training target values.
-
-    Returns:
-        sklearn.linear_model.LinearRegression: The trained linear regression model.
-    """
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.fit(X_train, y_train, batch_size=1, epochs=1)
     return model
 
 # 5. Predict and visualize
-def plot_predictions(data, y_test, y_pred):
-    """Plots the actual vs. predicted stock prices.
+def plot_predictions(y_test, y_pred, scaler):
+    """Plots the actual vs. predicted stock prices."""
+    y_test = y_test.reshape(-1, 1)
+    y_pred = y_pred.reshape(-1, 1)
 
-    Args:
-        data (pandas.DataFrame): The original DataFrame (used for plotting context).
-        y_test (numpy.ndarray): The actual target values.
-        y_pred (numpy.ndarray): The predicted target values.
-    """
+    y_test = scaler.inverse_transform(y_test)
+    y_pred = scaler.inverse_transform(y_pred)
+
     plt.figure(figsize=(12,6))
-    plt.plot(range(len(y_test)), y_test, label='Actual')
-    plt.plot(range(len(y_pred)), y_pred, label='Predicted')
+    plt.plot(y_test, label='Actual')
+    plt.plot(y_pred, label='Predicted')
     plt.legend()
     plt.title('Stock Price Prediction')
     plt.xlabel('Time')
@@ -96,8 +68,8 @@ def plot_predictions(data, y_test, y_pred):
 if __name__ == "__main__":
     ticker = input("Enter stock ticker (e.g., AAPL): ")
     data = fetch_data(ticker)
-    X, y = prepare_data(data)
+    X, y, scaler = prepare_data(data)
     X_train, X_test, y_train, y_test = split_data(X, y)
-    model = train_model(X_train, y_train)
+    model = build_and_train_model(X_train, y_train)
     y_pred = model.predict(X_test)
-    plot_predictions(data, y_test, y_pred)
+    plot_predictions(y_test, y_pred, scaler)
