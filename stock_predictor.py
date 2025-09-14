@@ -1,29 +1,10 @@
-import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from portfolio import simulate_trading
 
-# 1. Download historical stock data
-def fetch_data(ticker, period='5y'):
-    """Fetches historical stock data from Yahoo Finance.
-
-    Args:
-        ticker (str): The stock ticker symbol (e.g., 'AAPL').
-        period (str): The period for which to download the data.
-                      Valid periods are '1d', '5d', '1mo', '3mo',
-                      '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max'.
-                      Defaults to '5y'.
-
-    Returns:
-        pandas.DataFrame: A DataFrame containing the historical stock data.
-    """
-    data = yf.download(ticker, period=period)
-    return data
-
-# 2. Prepare features and target
+# 1. Prepare features and target
 def prepare_data(data):
     """Prepares the data for training the model.
 
@@ -93,30 +74,3 @@ def plot_predictions(data, y_test, y_pred):
     plt.xlabel('Time')
     plt.ylabel('Price')
     plt.show()
-
-def plot_portfolio_performance(portfolio_values):
-    """
-    Plots the portfolio's performance over time.
-
-    Args:
-        portfolio_values (pandas.DataFrame): A DataFrame containing the portfolio's value over time.
-    """
-    plt.figure(figsize=(12,6))
-    plt.plot(portfolio_values.index, portfolio_values['value'])
-    plt.title('Portfolio Performance')
-    plt.xlabel('Date')
-    plt.ylabel('Portfolio Value')
-    plt.show()
-
-if __name__ == "__main__":
-    ticker = input("Enter stock ticker (e.g., AAPL): ")
-    data = fetch_data(ticker)
-    X, y = prepare_data(data)
-    X_train, X_test, y_train, y_test = split_data(X, y)
-    model = train_model(X_train, y_train)
-    y_pred = model.predict(X_test)
-    plot_predictions(data, y_test, y_pred)
-
-    # Simulate trading and plot portfolio performance
-    portfolio_values = simulate_trading(model, data)
-    plot_portfolio_performance(portfolio_values)

@@ -1,31 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from stock_predictor import fetch_data, prepare_data, split_data, train_model, plot_predictions
-
-def test_fetch_data(mocker):
-    # Mock the yfinance.download function
-    mock_download = mocker.patch('yfinance.download')
-
-    # Create a sample DataFrame to be returned by the mock
-    sample_data = pd.DataFrame({
-        'Open': [100, 102, 101],
-        'High': [103, 104, 102],
-        'Low': [99, 101, 100],
-        'Close': [102, 103, 101],
-        'Volume': [1000, 1200, 1100]
-    })
-    mock_download.return_value = sample_data
-
-    # Call the function to be tested
-    ticker = 'AAPL'
-    data = fetch_data(ticker)
-
-    # Assert that the mock was called with the correct ticker
-    mock_download.assert_called_once_with(ticker, period='5y')
-
-    # Assert that the function returns the mocked data
-    pd.testing.assert_frame_equal(data, sample_data)
+from stock_predictor import prepare_data, split_data, train_model, plot_predictions
 
 def test_prepare_data():
     # Create a sample DataFrame

@@ -8,14 +8,14 @@ class Portfolio:
     def __init__(self, initial_capital=100000):
         """
         Initializes the portfolio.
-
         Args:
             initial_capital (float): The starting capital.
         """
         self.initial_capital = initial_capital
         self.cash = initial_capital
-        self.holdings = {}
+        self.positions = {}
         self.history = []
+        self.holdings_history = []
 
     def buy(self, ticker, price, quantity):
         """
@@ -24,7 +24,7 @@ class Portfolio:
         cost = price * quantity
         if self.cash >= cost:
             self.cash -= cost
-            self.holdings[ticker] = self.holdings.get(ticker, 0) + quantity
+            self.positions[ticker] = self.positions.get(ticker, 0) + quantity
             self.history.append({'action': 'buy', 'ticker': ticker, 'price': price, 'quantity': quantity})
             return True
         return False
@@ -33,50 +33,36 @@ class Portfolio:
         """
         Sells a stock.
         """
-        if self.holdings.get(ticker, 0) >= quantity:
+        if self.positions.get(ticker, 0) >= quantity:
             self.cash += price * quantity
-            self.holdings[ticker] -= quantity
-            if self.holdings[ticker] == 0:
-                del self.holdings[ticker]
+            self.positions[ticker] -= quantity
+            if self.positions[ticker] == 0:
+                del self.positions[ticker]
             self.history.append({'action': 'sell', 'ticker': ticker, 'price': price, 'quantity': quantity})
             return True
         return False
 
-    def get_value(self, prices):
+    def get_total_value(self, prices):
         """
-        Calculates the total value of the portfolio.
+        Calculates the total value of the portfolio for a given set of prices.
+        Args:
+            prices (pd.Series): A pandas Series with tickers as index and prices as values.
         """
         value = self.cash
-        for ticker, quantity in self.holdings.items():
+        for ticker, quantity in self.positions.items():
             value += prices[ticker] * quantity
         return value
 
-def simulate_trading(model, data, initial_capital=100000):
-    """
-    Simulates a trading strategy based on the model's predictions.
-
-    Args:
-        model: The trained machine learning model.
-        data (pandas.DataFrame): The historical stock data.
-        initial_capital (float): The starting capital for the portfolio.
-
-    Returns:
-        pandas.DataFrame: A DataFrame containing the portfolio's value over time.
-    """
-    portfolio = Portfolio(initial_capital)
-    portfolio_values = []
-
-    for i in range(len(data) - 1):
-        current_price = data['Close'].iloc[i]
-        prediction = model.predict([[current_price]])[0]
-
-        if prediction > current_price:
-            # Buy signal
-            portfolio.buy('stock', current_price, 1)
-        elif prediction < current_price and portfolio.holdings.get('stock', 0) > 0:
-            # Sell signal
-            portfolio.sell('stock', current_price, 1)
-
-        portfolio_values.append(portfolio.get_value({'stock': current_price}))
-
-    return pd.DataFrame({'value': portfolio_values}, index=data.index[:-1])
+    def update_holdings_history(self, date, prices):
+        """
+        Records the daily holdings and cash.
+        Args:
+            date (datetime): The current date.
+            prices (pd.Series): A pandas Series with tickers as index and prices as values.
+        """
+        holdings = {}
+        for ticker, quantity in self.positions.items():
+            holdings[ticker] = quantity * prices[ticker]
+        holdings['cash'] = self.cash
+        holdings['total'] = self.get_total_value(prices)
+        self.holdings_history.append((date, holdings))
