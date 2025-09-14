@@ -6,6 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
+from portfolio import Portfolio
+from strategy import MovingAverageCrossoverStrategy
+from backtester import Backtester
 
 # 1. Download historical stock data
 def fetch_data(ticker, period='5y'):
@@ -65,11 +68,40 @@ def plot_predictions(y_test, y_pred, scaler):
     plt.ylabel('Price')
     plt.show()
 
-if __name__ == "__main__":
-    ticker = input("Enter stock ticker (e.g., AAPL): ")
+def run_backtest(ticker):
+    """Runs the backtesting simulation."""
     data = fetch_data(ticker)
-    X, y, scaler = prepare_data(data)
-    X_train, X_test, y_train, y_test = split_data(X, y)
-    model = build_and_train_model(X_train, y_train)
-    y_pred = model.predict(X_test)
-    plot_predictions(y_test, y_pred, scaler)
+    portfolio = Portfolio()
+    strategy = MovingAverageCrossoverStrategy()
+    backtester = Backtester(portfolio, strategy, data)
+    results = backtester.run()
+
+    # Plot portfolio value
+    plt.figure(figsize=(12, 6))
+    plt.plot(results['portfolio_value'])
+    plt.title('Portfolio Value Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Portfolio Value ($)')
+    plt.show()
+
+    # Print summary
+    summary = backtester.get_summary()
+    print("Backtest Summary:")
+    print(f"Total Return: {summary['total_return']:.2%}")
+    print(f"Final Portfolio Value: ${summary['final_portfolio_value']:.2f}")
+
+if __name__ == "__main__":
+    choice = input("Enter '1' for prediction or '2' for backtesting: ")
+    if choice == '1':
+        ticker = input("Enter stock ticker (e.g., AAPL): ")
+        data = fetch_data(ticker)
+        X, y, scaler = prepare_data(data)
+        X_train, X_test, y_train, y_test = split_data(X, y)
+        model = build_and_train_model(X_train, y_train)
+        y_pred = model.predict(X_test)
+        plot_predictions(y_test, y_pred, scaler)
+    elif choice == '2':
+        ticker = input("Enter stock ticker for backtesting (e.g., AAPL): ")
+        run_backtest(ticker)
+    else:
+        print("Invalid choice.")
