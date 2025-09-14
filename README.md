@@ -61,7 +61,7 @@ A plot window will appear showing the comparison.
 
 ## Project Structure
 
-- `stock_predictor.py` — Main script for data fetching, modeling, and visualization
+- `stock_predictor.py` — Main script for data fetching, modeling, and visualization. The code is fully documented with docstrings to explain the functionality of each function.
 - `requirements.txt` — List of required Python packages
 - `README.md` — Project documentation
 - `tests/` — Directory containing the test suite.
