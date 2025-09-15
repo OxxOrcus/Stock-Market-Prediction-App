@@ -9,7 +9,10 @@ This application predicts stock prices using historical data and machine learnin
 - Trains a simple Linear Regression model (using `scikit-learn`)
 - Predicts future stock prices
 - Visualizes actual vs. predicted prices with `matplotlib`
-- Easily extensible for more advanced models (e.g., LSTM, portfolio simulation)
+- **Portfolio Management**: Track trades, cash, and holdings.
+- **Backtesting Engine**: Test trading strategies against historical data.
+- **Strategy Implementation**: Includes a sample Moving Average Crossover strategy.
+- Easily extensible for more advanced models and strategies.
 
 ## Requirements
 
@@ -61,9 +64,12 @@ A plot window will appear showing the comparison.
 
 ## Project Structure
 
-- `stock_predictor.py` — Main script for data fetching, modeling, and visualization. The code is fully documented with docstrings to explain the functionality of each function.
-- `requirements.txt` — List of required Python packages
-- `README.md` — Project documentation
+- `stock_predictor.py` — Main script for data fetching, modeling, and visualization.
+- `portfolio.py` — Manages the trading portfolio, including cash, holdings, and transactions.
+- `backtester.py` — Orchestrates the backtesting of trading strategies.
+- `strategy.py` — Defines the trading strategy logic (e.g., Moving Average Crossover).
+- `requirements.txt` — List of required Python packages.
+- `README.md` — Project documentation.
 - `tests/` — Directory containing the test suite.
 
 ## Testing
@@ -81,14 +87,17 @@ The test suite provides **82% coverage** for the `stock_predictor.py` module, va
 
 For detailed instructions on how to run the tests, please see the `tests/README.md` file.
 
+## DONE
+
+- **Portfolio Simulation**: A complete backtesting engine has been implemented, allowing users to simulate trading strategies and track performance. See `portfolio.py` and `backtester.py`.
+- **Technical Analysis Integration**: The backtester now includes a `MovingAverageCrossoverStrategy`. See `strategy.py`.
+
 ## Future Improvements
 
 This project can be extended in many ways. Here are some ideas for future enhancements:
 
 - **Advanced Modeling**: Replace the simple Linear Regression model with more sophisticated models like LSTMs (Long Short-Term Memory) using TensorFlow or PyTorch for better temporal analysis.
 - **Real-Time Visualization**: Implement a real-time dashboard using Plotly Dash or Streamlit to visualize stock prices and predictions as they update.
-- **Portfolio Simulation**: Build a feature to simulate a trading portfolio, allowing users to backtest strategies and track hypothetical performance.
-- **Technical Analysis Integration**: Incorporate more technical indicators (e.g., RSI, MACD, Bollinger Bands) to enrich the feature set for the model.
 - **Sentiment Analysis**: Integrate sentiment analysis from news articles or social media (e.g., Twitter, Reddit) to gauge market sentiment and improve prediction accuracy.
 - **Hyperparameter Tuning**: Add automated hyperparameter tuning using techniques like GridSearchCV or RandomizedSearchCV to optimize model performance.
 - **Interactive Web UI**: Develop a full-fledged interactive web application using a framework like Flask or Django, allowing for a richer user experience.
